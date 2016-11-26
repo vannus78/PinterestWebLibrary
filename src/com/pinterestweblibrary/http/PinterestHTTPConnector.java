@@ -139,12 +139,11 @@ public class PinterestHTTPConnector implements AutoCloseable{
      * Return a list of all PinterestPin of a given board.
      * 
      * @param board
-     * @return
      * @throws URISyntaxException
      * @throws IOException 
      */
-    public ArrayList<PinterestPin> getBoardPins(PinterestBoard board) throws URISyntaxException, IOException {
-        return getBoardPins(board,100);
+    public void getBoardPins(PinterestBoard board) throws URISyntaxException, IOException {
+        getBoardPins(board,100);
     }
     
     /**
@@ -152,21 +151,21 @@ public class PinterestHTTPConnector implements AutoCloseable{
      * Pins are read page by page simulating the infinite page scrolling.
      * Page size specify how many pins are read in a request.
      * 
-     * @param pinBoard
+     * @param board
      * @param pageSize
-     * @return 
      * @throws java.net.URISyntaxException 
      * @throws java.io.IOException 
      */
-    public ArrayList<PinterestPin> getBoardPins(PinterestBoard pinBoard,  int pageSize) throws URISyntaxException, IOException{
+    public void getBoardPins(PinterestBoard board,  int pageSize) throws URISyntaxException, IOException{
         
-        ArrayList<PinterestPin> output = new ArrayList<>();
         TypeRequestPin callData = new TypeRequestPin();
         TypeResponsePin boardPins = new TypeResponsePin();
         com.pinterestweblibrary.types.pin.TypeOptions dataOptions = new  com.pinterestweblibrary.types.pin.TypeOptions();
         String [] bookmarks = null;
         
-        dataOptions.setBoard_id(pinBoard.getId());
+        board.getPins().clear();
+        
+        dataOptions.setBoard_id(board.getId());
         dataOptions.setPage_size(pageSize);
         do{
             dataOptions.setBookmarks(bookmarks);
@@ -194,14 +193,12 @@ public class PinterestHTTPConnector implements AutoCloseable{
                 pin.setId(currData.getId());
                 pin.setTitle(currData.getTitle());
                 pin.setUrl(currData.getImages().getOrig().getUrl());
-                output.add(pin);
+                board.getPins().add(pin);
             }
             
             bookmarks = boardPins.getResource().getOptions().getBookmarks();
         }
         while (!bookmarks[0].equals(BOOKMARK_END));
-        
-        return output;
     }
     
     /**

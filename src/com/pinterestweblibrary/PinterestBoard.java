@@ -23,11 +23,14 @@
  */
 package com.pinterestweblibrary;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Stefano Vannucci
  */
 public class PinterestBoard {
+    private ArrayList<PinterestPin> Pins = new ArrayList<>();
     private String id = "";
     private String url = "";
     private String name = "";
@@ -73,5 +76,13 @@ public class PinterestBoard {
     public void setSlug(String slug) {
         this.slug = slug;
     }
-       
+
+    public ArrayList<PinterestPin> getPins() {
+        return Pins;
+    }
+
+    public void setPins(ArrayList<PinterestPin> Pins) {
+        this.Pins = Pins;
+    }
+    
 }
