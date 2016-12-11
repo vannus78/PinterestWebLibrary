@@ -92,24 +92,31 @@ public class PinterestHTTPConnector implements AutoCloseable{
         if (userName == null || userName.isEmpty())
             return false;
         
-        try {
-            uri = new URIBuilder()
-                    .setScheme("https")
-                    .setHost("www.pinterest.com")
-                    .setPath("/" + userName)
-                    .build();
-            
-            this.httpget.setURI(uri);
-            this.response = httpclient.execute(this.httpget);
-            switch (this.response.getStatusLine().getStatusCode()){
-                case HttpStatus.SC_ACCEPTED:
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (URISyntaxException | IOException ex) {
-            return false;
+        String url = "https://www.pinterest.com/"+userName;
+        
+        do {
+            try {
+                uri = new URI(url);
+                this.httpget.setURI(uri);
+                this.response = httpclient.execute(this.httpget);
+                switch (this.response.getStatusLine().getStatusCode()){
+                    case HttpStatus.SC_OK:
+                        return true;
+                    case HttpStatus.SC_MOVED_TEMPORARILY:
+                    case HttpStatus.SC_MOVED_PERMANENTLY:
+                        url = this.response.getHeaders("Location").toString();
+                        this.response.close();
+                        break;
+                    default:
+                        return false;
+                }
+            } catch (URISyntaxException | IOException ex) {
+                return false;
+            }            
         }
+        while(true);
+        
+
     }
     
     /**
