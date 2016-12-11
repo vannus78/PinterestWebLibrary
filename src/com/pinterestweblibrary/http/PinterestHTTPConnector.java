@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -68,7 +69,7 @@ public class PinterestHTTPConnector implements AutoCloseable{
         httpget.setHeader("Host", "www.pinterest.com");
         httpget.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
         httpget.setHeader("Accept", "application/json, text/javascript, */*; q=0.01");
-        httpget.setHeader("Accept-Language", "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3");
+        //httpget.setHeader("Accept-Language", "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3");
         httpget.setHeader("Accept-Encoding", "gzip, deflate, br");
         httpget.setHeader("X-Pinterest-AppState", "active");
         httpget.setHeader("X-NEW-APP", "1");
@@ -80,14 +81,47 @@ public class PinterestHTTPConnector implements AutoCloseable{
     }
     
     /**
+     * Verify Pinterest's user existance.
+     * Return true if user exists, false otherwise.
+     * 
+     * @param userName
+     * @return 
+     */
+    public boolean UserExists(String userName){
+        
+        if (userName == null || userName.isEmpty())
+            return false;
+        
+        try {
+            uri = new URIBuilder()
+                    .setScheme("https")
+                    .setHost("www.pinterest.com")
+                    .setPath("/" + userName)
+                    .build();
+            
+            this.httpget.setURI(uri);
+            this.response = httpclient.execute(this.httpget);
+            switch (this.response.getStatusLine().getStatusCode()){
+                case HttpStatus.SC_ACCEPTED:
+                    return true;
+                default:
+                    return false;
+            }
+        } catch (URISyntaxException | IOException ex) {
+            return false;
+        }
+    }
+    
+    /**
      * Retrieve boards list of a Pinerest User.
      * 
      * @param userName
      * @return
      * @throws URISyntaxException
      * @throws IOException 
+     * @throws com.pinterestweblibrary.http.UserNameNotFoundException 
      */
-    public  ArrayList<PinterestBoard> retrieveBoards(String userName) throws URISyntaxException, IOException{
+    public  ArrayList<PinterestBoard> retrieveBoards(String userName) throws URISyntaxException, IOException, UserNameNotFoundException{
         
         TypeRequestUserBoards callData = new TypeRequestUserBoards();
         TypeOptions callOptions = new TypeOptions();
@@ -95,6 +129,10 @@ public class PinterestHTTPConnector implements AutoCloseable{
         ArrayList<PinterestBoard> output = new ArrayList<>();
         String [] bookmarks = null;
         String [] urlSplit = null;
+        
+        if (!UserExists(userName)){
+            throw new UserNameNotFoundException("User " + userName + " doesn't exists.");
+        }
         
         callOptions.setUsername(userName);
         callOptions.setField_set_key("grid_item");
@@ -111,6 +149,10 @@ public class PinterestHTTPConnector implements AutoCloseable{
 
             this.httpget.setURI(uri);
             this.response = httpclient.execute(this.httpget);
+            switch (this.response.getStatusLine().getStatusCode()){
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new UserNameNotFoundException("Unable to find boards for user " + userName);
+            }
             userBoards =  parser.fromJson(handler.handleResponse(this.response), TypeResponseUserBoards.class);
             this.response.close();
             
