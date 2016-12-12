@@ -11,8 +11,8 @@ The library makes HTTP calls to pinterest site in AJAX format, analyze JSON resu
 <ul>
   <li><b>com.pinterestweblibrary</b> is the main package, it contains the base classes PinterestBoard and PinterestPin. A Pinterest board is a container for Pinterest pins, in fact it expose an array of PinterestPin.</li>
   <li><b>com.pinterestweblibrary.http</b> package contains the connector to Pinterst site. Class PinterestHTTPConnector in the package is the HTTP connector, it expose methods to retrieve boards informations, board's pins and check for user existence.
-  The connector is the core of the library and iteracts with pinterest site making AJAX calls and analyzing JSON response.</li>
-  <li><b>com.pinterestweblibrary.types</b> package and it's sub packages contains POJO classes necessary to contains JSON response. These objects are used by the connector to make requests to pinterest site and store response. JSON response contains lots of informations filtered by HTTP connector in order to populate PinterestBoard and PinteresPin objects.</li>
+  The connector is the core of the library and interacts with pinterest site making AJAX calls and analyzing JSON response.</li>
+  <li><b>com.pinterestweblibrary.types</b> package and its sub packages contains POJO classes necessary to contains JSON responses. These objects are used by the connector to make requests to pinterest site and store response. JSON response contains lots of informations filtered by HTTP connector in order to populate PinterestBoard and PinteresPin objects.</li>
 </ul>
 
 <h2>Usage</h2>
